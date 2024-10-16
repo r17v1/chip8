@@ -29,5 +29,6 @@ CHIP-8 is an interpreted programming language, developed in the 1970s, used to c
 
 ## Usage 
 - For windows you need to download `sdl2.dll`. Download a [build here](https://github.com/libsdl-org/SDL/releases/tag/release-2.30.8) put the dll inside the build folder.
-- inside build folder run `./chip8 file_path` eg: `./chip8 ../ROMS/BRIX.ch8`
+- inside build folder run `./chip8`. Optional args `--file_path=path to rom`, `--fps=fps` and `--clock_speed=clock speed` can be added. Eg: `./chip8 --file_path=../ROMS/BRIX.ch8 --fps=60 --clock_speed=700` 
+- `./chip8 --help` can be used to see instructions. 
 - Controls: 1 2 3 4 q w e r a s d f z x c v
