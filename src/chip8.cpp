@@ -156,7 +156,7 @@ void Chip8::storeKey(uint8_t x) {
 }
 
 void Chip8::updateTimers() {
-    uint16_t ticks = (timerPrecision * 60) / fps;
+    uint16_t ticks = (timerPrecision * timerFrequency) / fps;
     if (delayTimer > 0) {
        delayTimer = delayTimer >= ticks ? delayTimer - ticks : 0;
     }   

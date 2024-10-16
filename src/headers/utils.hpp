@@ -15,10 +15,10 @@ class utils {
                 std::string key;
                 std::string value;
                 auto pos = arg.find('=');
-                if (pos != std::string::npos) {
+                if (pos != std::string::npos && pos > 2 && pos + 1 < arg.size()) {
                     key = arg.substr(2, pos - 2);
                     value = arg.substr(pos + 1);
-                } else {
+                } else if (arg.size() > 2) {
                     key = arg.substr(2);
                     if (i + 1 < argc && argv[i + 1][0] != '-') {
                         value = argv[++i];
@@ -27,7 +27,9 @@ class utils {
                     }
                 }
 
-                args[key] = value;
+                if (!key.empty()) {
+                    args[key] = value;
+                }
             }
         }
         return args;
