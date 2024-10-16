@@ -7,13 +7,24 @@ class Chip8 {
 public:
     Chip8 ();
     ~Chip8();
-    const bool (&getDisplay() const)[64][32];
-    bool shouldBeep();
     void loadFile(const char* filePath);
     void executeOneCycle();
     void executeFrame();
     bool keyboard[16];
-    bool drawFlag;
+
+    bool shouldBeep() const;
+    const bool (&getDisplay() const)[64][32];
+
+    bool getDrawFlag() const;
+    void resetDrawFlag();
+
+    uint16_t getFPS() const;
+    void setFPS(const uint16_t fps);
+
+    uint16_t getProcessorClockSpeed() const;
+    void setProcessorClockSpeed(const uint16_t clockSpeed);
+
+
 
 private:
     uint16_t pc;
@@ -23,10 +34,15 @@ private:
     uint16_t addressRegister;
     uint16_t memoryStack[48];
     uint8_t stackPointer;
-    uint8_t delayTimer;
-    uint8_t soundTimer;
+    uint16_t delayTimer;
+    uint16_t soundTimer;
+    uint8_t timerPrecision;
+    uint16_t processorClockSpeed;
+    uint16_t fps;
+    uint8_t timerFrequency;
+    bool drawFlag;
     bool display[64][32];
-    int processorClockSpeed;
+
     
     void readOpcode();
     void clearDisplay();

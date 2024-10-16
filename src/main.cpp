@@ -1,30 +1,47 @@
 #include "SDLWrapper.hpp"
 #include "Chip8.hpp"
+#include "utils.hpp"
 #include <iostream>
 #include <thread>
 
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <filename>" << std::endl;
-        return 1;
+    auto args = utils::parseArguments(argc, argv);
+    if (args.find(utils::CONSTANTS::HELP_KEY) != args.end()) {
+        utils::printHelp(argv);
+        return 0;
     }
-    const int FPS = 60;
-    const int frameDelay = 1000 / FPS;
-    Uint32 frameStart;
-    int frameTime;
 
     Chip8 chip8;
-    chip8.loadFile(argv[1]);
+    if (args.find(utils::CONSTANTS::FILE_PATH_KEY) != args.end()) {
+        chip8.loadFile(args[utils::CONSTANTS::FILE_PATH_KEY].c_str());
+    } else {
+        chip8.loadFile(utils::CONSTANTS::DEFAULT_FILE_PATH);
+    }
+
+     if (args.find(utils::CONSTANTS::FPS_KEY) != args.end()) {
+        chip8.setFPS(std::stoi(args[utils::CONSTANTS::FPS_KEY]));
+     } else {
+        chip8.setFPS(utils::CONSTANTS::DEFAULT_FPS);
+     }
+
+     if (args.find(utils::CONSTANTS::CLOCK_SPEED_KEY) != args.end()) {
+        chip8.setProcessorClockSpeed(std::stoi(args[utils::CONSTANTS::CLOCK_SPEED_KEY]));
+     } else {
+        chip8.setProcessorClockSpeed(utils::CONSTANTS::DEFAULT_CLOCK_SPEED);
+     }
 
     SDLWrapper sdlWrapper(argv[1], 64, 32, 20);
+    Uint32 frameStart;
+    Uint32 frameTime;
+    Uint32 frameDelay = 1000 / chip8.getFPS();
 
     while(sdlWrapper.checkRunning()) {
         frameStart = SDL_GetTicks();
         sdlWrapper.handleEvents();
         sdlWrapper.setKeyState(chip8.keyboard);
-        if (chip8.drawFlag) {
+        if (chip8.getDrawFlag()) {
             sdlWrapper.render(chip8.getDisplay());
-            chip8.drawFlag = false;
+            chip8.resetDrawFlag();
         }
         if (chip8.shouldBeep()) {
             SDL_PauseAudioDevice(sdlWrapper.deviceId, 0); 
@@ -42,3 +59,4 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+ 

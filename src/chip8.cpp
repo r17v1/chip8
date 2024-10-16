@@ -7,7 +7,8 @@
 #include <random>
 
 Chip8::Chip8() : pc(0x200), opcode(0), memory{}, dataRegisters{}, addressRegister(0), memoryStack{},
-stackPointer(0), delayTimer(0), soundTimer(0), display{}, keyboard{}, drawFlag(false), processorClockSpeed(700) {}
+stackPointer(0), delayTimer(0), soundTimer(0), display{}, keyboard{}, drawFlag(false), 
+processorClockSpeed(700), timerPrecision(1000), fps(60), timerFrequency(60) {}
 
 Chip8::~Chip8() {}
 
@@ -15,9 +16,33 @@ const bool (&Chip8::getDisplay() const)[64][32] {
     return display;
 }
 
-bool Chip8::shouldBeep() {
+bool Chip8::shouldBeep() const {
     return soundTimer != 0;
 }
+
+bool Chip8::getDrawFlag() const {
+    return drawFlag;
+};
+
+void Chip8::resetDrawFlag() {
+    drawFlag = false;
+}
+
+uint16_t Chip8::getFPS() const {
+    return fps;
+}
+
+void Chip8::setFPS(const uint16_t fps) {
+    this -> fps  = fps;
+};
+
+uint16_t Chip8::getProcessorClockSpeed() const {
+    return processorClockSpeed;
+};
+
+void Chip8::setProcessorClockSpeed(const uint16_t clockSpeed) {
+    this -> processorClockSpeed = clockSpeed;
+};
 
 void Chip8::loadFile(const char* filePath) {
     const unsigned char fontSprites[80] = {
@@ -52,7 +77,7 @@ void Chip8::loadFile(const char* filePath) {
     std::ifstream file(filePath, std::ios::binary);
     if (!file) {
         std::cerr << "Cannot open file!" << std::endl;
-        throw std::runtime_error("Could not read file.");
+        throw std::runtime_error("Could not read file. Use --help to see instructions.");
     }
 
     file.read(reinterpret_cast<char*>(memory + 0x200), fileSize);
@@ -131,17 +156,18 @@ void Chip8::storeKey(uint8_t x) {
 }
 
 void Chip8::updateTimers() {
-   if (delayTimer > 0) {
-       --delayTimer;
-   }   
+    uint16_t ticks = (timerPrecision * 60) / fps;
+    if (delayTimer > 0) {
+       delayTimer = delayTimer >= ticks ? delayTimer - ticks : 0;
+    }   
    
-   if (soundTimer > 0) {
-       --soundTimer;
-   }
+    if (soundTimer > 0) {
+       soundTimer = soundTimer >= ticks ? soundTimer - ticks : 0;
+    }
 }
 
 void Chip8::executeFrame() {
-    for(uint32_t i = 0; i < processorClockSpeed/60 ; i++) {
+    for(uint32_t i = 0; i < processorClockSpeed/fps ; i++) {
         executeOneCycle();
     }
     updateTimers();
@@ -290,16 +316,16 @@ void Chip8::executeOneCycle() {
         case 0xF: 
             switch (opcode & 0x00FF) {
                 case 0x07:
-                    dataRegisters[(opcode & 0x0F00) >> 8] = delayTimer;
+                    dataRegisters[(opcode & 0x0F00) >> 8] = delayTimer / timerPrecision;
                     break;
                 case 0x0A:
                     storeKey((opcode & 0x0F00) >> 8);
                     break;
                 case 0x15:
-                    delayTimer = dataRegisters[(opcode & 0x0F00) >> 8];
+                    delayTimer = dataRegisters[(opcode & 0x0F00) >> 8] * timerPrecision;
                     break;
                 case 0x18:
-                    soundTimer = dataRegisters[(opcode & 0x0F00) >> 8];
+                    soundTimer = dataRegisters[(opcode & 0x0F00) >> 8] * timerPrecision;
                     break;
                 case 0x1E:
                     addressRegister += dataRegisters[(opcode & 0x0F00) >> 8];
