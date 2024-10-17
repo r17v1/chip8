@@ -15,8 +15,7 @@ public:
     bool shouldBeep() const;
     const bool (&getDisplay() const)[64][32];
 
-    bool getDrawFlag() const;
-    void resetDrawFlag();
+    bool getDrawFlag();
 
     uint16_t getFPS() const;
     void setFPS(const uint16_t fps);

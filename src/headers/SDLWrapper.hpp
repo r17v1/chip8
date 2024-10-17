@@ -5,7 +5,7 @@
 
 class SDLWrapper {
 public:
-    SDLWrapper(const char* title, const int screenWidth, const int screenHeight, const int screenMultiplier);
+    SDLWrapper(const char* title, const int screenWidth, const int screenHeight, const int screenMultiplier, const int audioAmplitude, const int audioFrequency);
     const bool checkRunning();
     ~SDLWrapper();
     void handleEvents();
@@ -13,7 +13,8 @@ public:
     void clear();
     const bool (&getKeyState() const)[16];
     void setKeyState(bool* chip8Keyboard);
-    SDL_AudioDeviceID deviceId;
+    void playAudio(bool audioFlag);
+    
 
 private:
     SDL_Window* window;
@@ -26,6 +27,7 @@ private:
     const int AUDIO_FREQUENCY;
     SDL_AudioSpec desiredSpec;
     SDL_AudioSpec obtainedSpec;
+    SDL_AudioDeviceID deviceId;
     static void audio_callback(void* userdata, Uint8* stream, int len);
 };
 
